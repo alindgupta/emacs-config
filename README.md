@@ -3,7 +3,7 @@
 - install with Homebrew ```brew cask install emacs```
 
 ## Rtags
-- Compile commands .json file with
+- Export compile commands json file with
 ```cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 . ```
 - Start daemon
 ```
@@ -12,3 +12,6 @@ rdm &
 rc -J .
 ```
 - Open project in emacs
+
+## Notes
+- Don't use ```:q```, quits Emacs in full screen mode without warning
