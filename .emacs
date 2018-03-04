@@ -1,55 +1,65 @@
 (require 'package)
+
+(setq package-enable-at-startup nil)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+
 (package-initialize)
 
-;; Set by emacs
+;; Variables set through Emacs
 (custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(ansi-color-names-vector
-   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
- '(custom-enabled-themes (quote (arjen-grey)))
+ '(custom-enabled-themes '(arjen-grey))
  '(custom-safe-themes
-   (quote
-    ("858a353233c58b69dbe3a06087fc08905df2d8755a0921ad4c407865f17ab52f" "8e4efc4bed89c4e67167fdabff77102abeb0b1c203953de1e6ab4d2e3a02939a" "126506c43a767c3942aa45553ffe0cc72a50a5faa4f7fb6a304840f6f7fbe7b5" "a320857a8bb86952017aa9493cee5ece0cea5b648eadc429e28eaa0f26a8c7c0" "2ebcce54e375b62590474961a11da97d6c2ad625b791a7fd0fce4b3da0331986" "0946981198474d6c86798e01fcf4e3fa0bc58e2194f37b14c8006bd25eade6e5" "0d74f4f6dd4e010236c7922075793b61b120f6dbd00e3c274a8a3ed200a79032" "c4bd8fa17f1f1fc088a1153ca676b1e6abc55005e72809ad3aeffb74bd121d23" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "83db918b06f0b1df1153f21c0d47250556c7ffb5b5e6906d21749f41737babb7" default)))
- '(hl-paren-colors
-   (quote
-    ("#B9F" "#B8D" "#B7B" "#B69" "#B57" "#B45" "#B33" "#B11")))
- '(menu-bar-mode nil)
- '(package-archives
-   (quote
-    (("gnu" . "http://elpa.gnu.org/packages/")
-     ("melpa" . "http://melpa.org/packages/"))))
+   '("83db918b06f0b1df1153f21c0d47250556c7ffb5b5e6906d21749f41737babb7" default))
  '(package-selected-packages
-   (quote
-    (matlab-mode cython-mode key-chord gruvbox-theme highlight-numbers nord-theme ## cmake-mode flycheck-irony flycheck company-rtags flycheck-rtags rtags irony polymode stan-mode flycheck-haskell flycheck-pyflakes py-autopep8 elpy arjen-grey-theme magit ess exec-path-from-shell markdown-mode haskell-mode evil)))
- '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
- '(scroll-bar-mode nil)
- '(tool-bar-mode nil))
+   '(auctex flycheck-pyflakes flycheck-rtags ess exec-path-from-shell haskell-mode key-chord stan-mode magit markdown-mode matlab-mode elpy flycheck cmake-mode company-rtags cython-mode evil arjen-grey-theme)))
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "#2a2f38" :foreground "#bdc3ce" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 130 :width normal :foundry "nil" :family "Consolas")))))
 
-;; Custom settings
-(global-font-lock-mode 1) ;; enable highlighting
-(exec-path-from-shell-initialize) ;; shell
-;; (add-to-list 'custom-theme-load-path "~/.emacs.d/emacs-color-theme-solarized-master")
-(set-frame-parameter nil 'background-mode 'dark)
+;; Manually set variables
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(set-fringe-mode 0)
+(scroll-bar-mode -1)
 (global-linum-mode 1)
 (setq column-number-mode t)
-(set-fringe-mode 0)
+(setq-default line-spacing 2)
+(setq-default indent-tabs-mode nil)
 
-;; Packages etc.
+;; Start up buffer should be fancy-splash-screen
+(defun always-use-fancy-splash-screens-p () 1)
+  (defalias 'use-fancy-splash-screens-p 'always-use-fancy-splash-screens-p)
+
+;; Recent files, show with C-x C-r
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+
+;; Running shell in emacs
+(exec-path-from-shell-initialize)
+
+;; Use evil-mode
 (require 'evil)
 (evil-mode 1)
 
+;; Key bindings for evil-mode
+(require 'key-chord)
+(key-chord-mode 1)
+(key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
 
+;; Two spaces for indentation in ESS
+(setq ess-default-style 'DEFAULT)
+
+;; Clear interactive shell with C-x c
+(defun clear-shell ()
+   (interactive)
+   (let ((old-max comint-buffer-maximum-size))
+     (setq comint-buffer-maximum-size 0)
+     (comint-truncate-buffer)
+     (setq comint-buffer-maximum-size old-max)))
+(global-set-key  (kbd "\C-x c") 'clear-shell)
+
+;; Rtags
 (require 'rtags)
 (require 'company)
 (require 'flycheck-rtags)
@@ -60,20 +70,27 @@
 (global-company-mode)
 (define-key c-mode-base-map (kbd "<C-tab>") (function company-complete))
 
-;; clear buffer
-(defun clear-shell ()
-   (interactive)
-   (let ((old-max comint-buffer-maximum-size))
-     (setq comint-buffer-maximum-size 0)
-     (comint-truncate-buffer)
-     (setq comint-buffer-maximum-size old-max)))
+;; auctex - disable fontification but keep colours
+(setq font-latex-fontify-script nil)
+(setq font-latex-fontify-sectioning 'color)
 
-(global-set-key  (kbd "\C-x c") 'clear-shell)
+;; Synchronizing auctex with Skim
+(require 'tex-site)
+(setq-default TeX-PDF-mode t)
+;; Make emacs aware of multi-file projects
+  ;;(setq-default TeX-master nil)
 
-(setq-default line-spacing 2)
+;; make latexmk available via C-c C-c
+(add-hook 'LaTeX-mode-hook (lambda ()
+  (push
+    '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+      :help "Run latexmk on file")
+    TeX-command-list)))
+(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
 
-(require 'key-chord)
-(key-chord-mode 1)
-(key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
-
-;;; .emacs ends here
+;; use Skim as default pdf viewer
+;; option -b highlights the current line; option -g opens Skim in the background  
+(setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+(setq TeX-view-program-list
+     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+(server-start); start emacs in server mode so that Skim can talk to it
