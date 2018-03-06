@@ -1,2 +1,7 @@
-.DS_Store
 .python-environments
+elpa/
+url/
+auto-save_list/
+srecode-map.el
+recentf
+*~
