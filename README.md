@@ -15,4 +15,4 @@ rc -J .
 - Open project in emacs
 
 ## Notes
-- Emacs >26.0 fixes the quit on ```:q```
+- Emacs >26.0 fixes the quit on ```:q``` in full screen mode on MacOSX
